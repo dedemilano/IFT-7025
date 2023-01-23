@@ -1,1 +1,1 @@
-# IFT-7025
+# Pacman projects on differents AI techniques from scratch and using librairies 
