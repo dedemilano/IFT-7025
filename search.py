@@ -81,12 +81,35 @@ def depthFirstSearch(problem):
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
+    
 
     print("Start:", problem.getStartState())
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    """
+     """
     "*** YOUR CODE HERE ***"
+    open_list = util.Stack()
+    close_state_list = []
+    close_action_list = []
+    
+    start_state = problem.getStartState()
+
+    open_list.push(start_state)
+
+    current_state = open_list.pop()
+
+    while problem.isGoalState(current_state)  == False and current_state not in close_state_list:
+        close_state_list.append(current_state)
+        for successor in problem.getSuccessors(current_state):
+            successor_state = successor[0]
+            print(f"the actual successor {successor}")
+            open_list.push(successor_state)
+
+
+        if open_list.isEmpty() == False:
+            current_state = open_list.pop()
+            print(f"current state {current_state}")
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
