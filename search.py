@@ -88,28 +88,39 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
      """
     "*** YOUR CODE HERE ***"
-    open_list = util.Stack()
-    close_state_list = []
-    close_action_list = []
+    open_state_list = util.Stack()
+    open_action_list = util.Stack()
+    close_list = []
+    actions_list = []
     
     start_state = problem.getStartState()
 
-    open_list.push(start_state)
+    open_action_list.push(start_state)
 
-    current_state = open_list.pop()
+    current_state = open_action_list.pop()
 
-    while problem.isGoalState(current_state)  == False and current_state not in close_state_list:
-        close_state_list.append(current_state)
-        for successor in problem.getSuccessors(current_state):
-            successor_state = successor[0]
-            print(f"the actual successor {successor}")
-            open_list.push(successor_state)
+    while problem.isGoalState(current_state)  == False :
+        if current_state == start_state:
+            close_list.append(current_state)
+        else:
 
+            if current_state not in close_list:
+                close_list.append(current_state)
+                for successor in problem.getSuccessors(current_state):
+                    successor_state = successor[0]
+                    action_made = successor[1]
+                    open_state_list.push(successor_state)
+                    open_action_list.push(action_made)
 
-        if open_list.isEmpty() == False:
-            current_state = open_list.pop()
-            print(f"current state {current_state}")
-
+                if open_state_list.isEmpty() == False:
+                    current_state = open_state_list.pop()
+                    action_made = open_action_list.pop()
+                    actions_list.append(action_made)
+            else:
+                current_state = open_state_list.pop()
+                action_made = open_action_list.pop()
+                actions_list.append(action_made)
+    print(actions_list)
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
