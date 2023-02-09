@@ -288,6 +288,8 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.initialCorner = [0, 0, 0, 0]
+        self.startState =  (self.startingPosition, self.initialCorner)
 
     def getStartState(self):
         """
@@ -295,6 +297,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        return self.startState
         util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -302,6 +305,9 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        if state[1] == [1, 1, 1, 1]: #etat final tout les coins sont visités
+            return True
+        return False
         util.raiseNotDefined()
 
     def getSuccessors(self, state):
@@ -316,6 +322,7 @@ class CornersProblem(search.SearchProblem):
         """
 
         successors = []
+        cout = 0
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
@@ -325,6 +332,19 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            nextPosition = (nextx, nexty)
+            hitsWall = self.walls[nextx][nexty]
+            list_corners = state[1][:]
+            if not hitsWall:
+                if nextPosition in self.corners:
+                    index_corner = self.corners.index(nextPosition) 
+                    list_corners[index_corner] = 1
+                succState = (nextPosition, list_corners)
+                cout = cout + 1
+                successors.append((succState, action, cout))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -342,6 +362,11 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
+def manhattan(A, B):
+    d = 0
+    for a, b in zip(A, B):
+        d += abs(a - b)
+    return d
 
 def cornersHeuristic(state, problem):
     """
@@ -360,7 +385,16 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    dist = []
+    (x, y) = state[0]
+    for item in state[1]:
+        if item == 0: # corner non visité
+            #print('*******', corners[state[1].index(item)]), '********')
+            manhattan_dist = manhattan((x, y), corners[state[1].index(item)])
+            #print('+++++++',manhattan_dist, '++++++++')
+            dist.append(manhattan_dist)
+    #print(dist)
+    return max(dist, default=0) #defaut 0 pour les cas où fois la liste est vide
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -454,6 +488,13 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    position, foodGrid = state
+    "*** YOUR CODE HERE ***"
+    food_list = foodGrid.asList()
+    dist = []
+    for item in food_list:
+        dist.append(manhattan(position, item))
+    return max(dist, default=0)
     return 0
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -485,6 +526,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.aStarSearch(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -521,6 +563,10 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        list_food = list(self.food)
+        #print('******', (x,y), '******')
+        #print('******',list_food, '******')
+        return list_food[x][y]
         util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
