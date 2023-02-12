@@ -19,6 +19,20 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+#Own class node to facilitate graph implementation
+
+class Node():
+    #classe pour les noeuds.
+    
+    def __init__( self,parent_node = None , action_made = None , action_cost = 0 , node_state = None):
+        self.parent_node , self.action_made , self.action_cost , self.node_state  = (parent_node , action_made , action_cost , node_state)
+        
+    def getAchild(self,successor_items):
+        return Node(parent_node =self , action_made=successor_items[1] , action_cost=successor_items[2] + self.action_cost , node_state = successor_items[0])
+    
+    
+
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -81,78 +95,108 @@ def depthFirstSearch(problem):
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-    
 
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-     """
+    
+    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    """
     "*** YOUR CODE HERE ***"
-    start_node = {'state': problem.getStartState(),'action':[],'cost':0}
-    
-    open_list = util.Stack()
+    start_node = Node(node_state=problem.getStartState())
+    open_list=util.Stack()
     open_list.push(start_node)
-    closed_list = []
+    closed_list=[]
+    action_list=[]
+    continue_search = True
+    while continue_search:
+        if open_list.isEmpty():
+            return []
+        
+        current_node=open_list.pop()
 
-    while open_list.isEmpty() == False:
-        current_node = open_list.pop()
-        current_state = current_node['state']
-        current_action = current_node['action']
-        current_cost = current_node['cost']
-        closed_list.append(current_state)
-        if problem.isGoalState(current_state):
-            return current_action
-        for successor_state , successor_action , successor_cost in problem.getSuccessors(current_state):
-            if successor_state not in closed_list:
-                current_node = {'state': successor_state,'action':current_action + [successor_action],'cost':current_cost + successor_cost}
-                open_list.push(current_node)
+        if problem.isGoalState(current_node.node_state):
+            current_parent=current_node.parent_node
+            action_made=current_node.action_made
+            while current_parent is not None:
+                action_list.append(action_made)
+                action_made=current_parent.action_made
+                current_parent=current_parent.parent_node
+            action_list.reverse()
+            return action_list
+        
+        if current_node.node_state not in closed_list:
+            closed_list.append(current_node.node_state)
+            successors_items=problem.getSuccessors(current_node.node_state)
+            for successor_items in successors_items:
+                if successor_items[0] not in closed_list:
+                    open_list.push(current_node.getAchild(successor_items))
     util.raiseNotDefined()
-
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    start_node = {'state': problem.getStartState(),'action':[],'cost':0}
-    
-    open_list = util.Queue()
+    start_node = Node(node_state=problem.getStartState())
+    open_list=util.Queue()
     open_list.push(start_node)
-    closed_list = []
+    closed_list=[]
+    action_list=[]
+    continue_search = True
+    while continue_search:
+        if open_list.isEmpty():
+            return []
+        
+        current_node=open_list.pop()
 
-    while open_list.isEmpty() == False:
-        current_node = open_list.pop()
-        current_state = current_node['state']
-        current_action = current_node['action']
-        current_cost = current_node['cost']
-        closed_list.append(current_state)
-        if problem.isGoalState(current_state):
-            return current_action
-        for successor_state , successor_action , successor_cost in problem.getSuccessors(current_state):
-            if successor_state not in closed_list:
-                current_node = {'state': successor_state,'action':current_action + [successor_action],'cost':current_cost + successor_cost}
-                open_list.push(current_node)
+        if problem.isGoalState(current_node.node_state):
+            current_parent=current_node.parent_node
+            action_made=current_node.action_made
+            while current_parent is not None:
+                action_list.append(action_made)
+                action_made=current_parent.action_made
+                current_parent=current_parent.parent_node
+            action_list.reverse()
+            return action_list
+        
+        if current_node.node_state not in closed_list:
+            closed_list.append(current_node.node_state)
+            successors_items=problem.getSuccessors(current_node.node_state)
+            for successor_items in successors_items:
+                if successor_items[0] not in closed_list:
+                    open_list.push(current_node.getAchild(successor_items))
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    start_node = {'state': problem.getStartState(),'action':[],'cost':0}
-    start_cost = start_node['cost']
+    start_node = Node(node_state=problem.getStartState())
+    start_cost = 0
     open_list = util.PriorityQueue()
     open_list.push(start_node , start_cost)
     closed_list = []
+    action_list = []
+    continue_search = True
+    while continue_search:
+        if open_list.isEmpty():
+            return []
+        
+        current_node=open_list.pop()
 
-    while open_list.isEmpty() == False:
-        current_node = open_list.pop()
-        current_state = current_node['state']
-        current_action = current_node['action']
-        current_cost = current_node['cost']
-        closed_list.append(current_state)
-        if problem.isGoalState(current_state):
-            return current_action
-        for successor_state , successor_action , successor_cost in problem.getSuccessors(current_state):
-            if successor_state not in closed_list:
-                current_node = {'state': successor_state,'action':current_action + [successor_action],'cost':current_cost + successor_cost}
-                open_list.push(current_node , current_node['cost'] + successor_cost)
+        if problem.isGoalState(current_node.node_state):
+            current_parent=current_node.parent_node
+            action_made=current_node.action_made
+            while current_parent is not None:
+                action_list.append(action_made)
+                action_made=current_parent.action_made
+                current_parent=current_parent.parent_node
+            action_list.reverse()
+            return action_list
+        
+        if current_node.node_state not in closed_list:
+            closed_list.append(current_node.node_state)
+            successors_items=problem.getSuccessors(current_node.node_state)
+            for successor_items in successors_items:
+                if successor_items[0] not in closed_list:
+                    open_list.update(current_node.getAchild(successor_items) ,current_node.getAchild(successor_items).action_cost)
     util.raiseNotDefined()
+    
 
 def nullHeuristic(state, problem=None):
     """
@@ -164,25 +208,36 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    start_node = {'state': problem.getStartState(),'action':[],'cost':0}
-    start_cost = start_node['cost']
+    start_node = Node(node_state=problem.getStartState())
+    start_cost = 0
     open_list = util.PriorityQueue()
     open_list.push(start_node , start_cost)
     closed_list = []
+    action_list = []
+    continue_search = True
+    while continue_search:
+        if open_list.isEmpty():
+            return []
+        
+        current_node=open_list.pop()
 
-    while open_list.isEmpty() == False:
-        current_node = open_list.pop()
-        current_state = current_node['state']
-        current_action = current_node['action']
-        current_cost = current_node['cost']
-        closed_list.append(current_state)
-        if problem.isGoalState(current_state):
-            return current_action
-        for successor_state , successor_action , successor_cost in problem.getSuccessors(current_state):
-            if successor_state not in closed_list:
-                h = heuristic(successor_state, problem)
-                current_node = {'state': successor_state,'action':current_action + [successor_action],'cost':current_cost + successor_cost}
-                open_list.push(current_node , current_node['cost'] + successor_cost +h)
+        if problem.isGoalState(current_node.node_state):
+            current_parent=current_node.parent_node
+            action_made=current_node.action_made
+            while current_parent is not None:
+                action_list.append(action_made)
+                action_made=current_parent.action_made
+                current_parent=current_parent.parent_node
+            action_list.reverse()
+            return action_list
+        
+        if current_node.node_state not in closed_list:
+            closed_list.append(current_node.node_state)
+            successors_items=problem.getSuccessors(current_node.node_state)
+            for successor_items in successors_items:
+                if successor_items[0] not in closed_list:
+                    h = heuristic(current_node.getAchild(successor_items).node_state, problem)
+                    open_list.update(current_node.getAchild(successor_items) ,current_node.getAchild(successor_items).action_cost + h)
     util.raiseNotDefined()
 
 
